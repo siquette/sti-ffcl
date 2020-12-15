@@ -1,0 +1,77 @@
+---
+title: "Untitled"
+author: "rodrigo_a_siquette"
+date: "14/09/2020"
+output:
+  html_document:
+    df_print: paged
+    
+---
+
+```{r}
+library("tidyverse")
+library("dplyr")
+library("readr")
+
+
+```
+
+
+```{r}
+#######  tabela catalogo
+
+tb_1 <- "https://raw.githubusercontent.com/fflch/scripts/master/tratamento-de-dados/caph.fflch.usp.br/data/TabelaCatalogo49.csv" 
+
+TabelaCatalogo49 <- read_csv(tb_1)
+
+names(TabelaCatalogo49)
+
+tabcatalago <- TabelaCatalogo49 %>% select(especificação, nreferencia, local, titulo, data, suporte, Legenda, Imagem, Sistema ) %>%  filter(suporte %in% c("CD-Rom", "Projeto Memória"))
+
+tabcatalago %>% distinct(especificação) # vereficando dados duplicado
+
+tabcatalago <- tabcatalago %>% distinct(especificação, .keep_all = T) # tirando dados duplicado
+
+
+
+
+###########--tabela geral
+
+tb_2 <-"https://raw.githubusercontent.com/fflch/scripts/master/tratamento-de-dados/caph.fflch.usp.br/data/TabelaGeralBd.csv" 
+
+TabelaGeralBd <- read_csv(tb_2)
+
+tabgeral <- TabelaGeralBd %>% select(especificação, nreferencia, local, titulo, data, suporte, Legenda, Imagem, Sistema ) %>%  filter(suporte %in% c("CD-Rom", "Projeto Memória"))
+
+tabgeral %>% distinct(especificação)  
+
+tabgeral <- tabgeral %>% distinct(especificação, .keep_all = T) # tirando dados duplicado
+
+
+####### junta tabela
+
+
+tabfinal <-  tabgeral %>%  anti_join(tabcatalago, by = "especificação") # descarta todas as observações em x que tenham uma correspondência  t
+
+tabfinal_2 <- merge(tabcatalago, tabfinal, all=T) ## junta as duas tabela
+
+tabfinal_2 %>% distinct(especificação) # verificar duplicaçao
+
+tabfinal_2["nids"]<- c(seq(47000,47091,1)) # colocar coluna nids
+
+tabfinal_2 <-  tabfinal_2 %>% select(nids, everything()) # colocar nids coomo primeira coluna
+
+write.csv(tabfinal_2, file = "tabcaph.csv", sep = ",", na = "NA", quote = T, row.names = F ) #exporta a planilha 
+
+
+
+
+
+
+```
+
+```{r}
+
+```
+
+
